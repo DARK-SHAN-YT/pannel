@@ -4,9 +4,9 @@
 echo "Setting web panel port to 7860..."
 /app/x-ui setting -port 7860
 
-# Optionally, also set the subscription server port to 7860 if needed
-echo "Setting subscription server port to 7860..."
-/app/x-ui setting -subPort 7860
+# Set a default username and password (you can customize these)
+echo "Setting default username and password..."
+/app/x-ui setting -username admin -password admin123
 
 # Start fail2ban if enabled
 [ $XUI_ENABLE_FAIL2BAN == "true" ] && fail2ban-client -x start
