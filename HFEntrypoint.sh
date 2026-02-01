@@ -41,6 +41,9 @@ echo "Setting web panel port to 7860..."
 echo "Setting default username and password..."
 /app/x-ui setting -username admin -password admin123
 
+# Wait a moment for settings to be applied
+sleep 2
+
 # Start fail2ban if enabled
 [ $XUI_ENABLE_FAIL2BAN == "true" ] && fail2ban-client -x start
 
