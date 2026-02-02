@@ -36,9 +36,8 @@ RUN apk add --no-cache --update \
   curl \
   openssl \
   python3 \
-  py3-pip
-
-RUN pip3 install certbot
+  py3-pip \
+  certbot
 
 COPY --from=builder /app/build/ /app/
 COPY --from=builder /app/DockerEntrypoint.sh /app/
