@@ -1,35 +1,51 @@
 #!/bin/sh
 
-# Generate SSL certificates if they don't exist
-SSL_DIR="/etc/x-ui/ssl"
-PRIVATE_KEY_PATH="$SSL_DIR/private.key"
-PUBLIC_KEY_PATH="$SSL_DIR/public.crt"
+# Check if Let's Encrypt certificates exist, otherwise use self-signed
+LETSENCRYPT_CERT="/etc/letsencrypt/live/kushansewmina7-pannel.hf.space/fullchain.pem"
+LETSENCRYPT_KEY="/etc/letsencrypt/live/kushansewmina7-pannel.hf.space/privkey.pem"
 
-mkdir -p $SSL_DIR
-
-if [ ! -f "$PRIVATE_KEY_PATH" ] || [ ! -f "$PUBLIC_KEY_PATH" ]; then
-    echo "Generating SSL certificates..."
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-        -keyout "$PRIVATE_KEY_PATH" \
-        -out "$PUBLIC_KEY_PATH" \
-        -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost"
-
-    if [ $? -eq 0 ]; then
-        echo "SSL certificates generated successfully"
-        echo "Private Key Path: $PRIVATE_KEY_PATH"
-        echo "Public Key Path: $PUBLIC_KEY_PATH"
-
-        # Set the certificate paths in the application
-        /app/x-ui setting -webCert "$PUBLIC_KEY_PATH" -webCertKey "$PRIVATE_KEY_PATH"
-    else
-        echo "Failed to generate SSL certificates"
-    fi
-else
-    echo "Using existing SSL certificates"
+# Set certificate paths
+if [ -f "$LETSENCRYPT_CERT" ] && [ -f "$LETSENCRYPT_KEY" ]; then
+    # Use Let's Encrypt certificates
+    PUBLIC_KEY_PATH="$LETSENCRYPT_CERT"
+    PRIVATE_KEY_PATH="$LETSENCRYPT_KEY"
+    echo "Using Let's Encrypt certificates"
     echo "Private Key Path: $PRIVATE_KEY_PATH"
     echo "Public Key Path: $PUBLIC_KEY_PATH"
+else
+    # Generate self-signed certificates
+    SSL_DIR="/etc/x-ui/ssl"
+    PRIVATE_KEY_PATH="$SSL_DIR/private.key"
+    PUBLIC_KEY_PATH="$SSL_DIR/public.crt"
 
-    # Set the certificate paths in the application
+    mkdir -p $SSL_DIR
+
+    if [ ! -f "$PRIVATE_KEY_PATH" ] || [ ! -f "$PUBLIC_KEY_PATH" ]; then
+        echo "Generating self-signed SSL certificates..."
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+            -keyout "$PRIVATE_KEY_PATH" \
+            -out "$PUBLIC_KEY_PATH" \
+            -subj "/C=US/ST=State/L=City/O=Organization/CN=kushansewmina7-pannel.hf.space"
+
+        if [ $? -eq 0 ]; then
+            echo "Self-signed SSL certificates generated successfully"
+            echo "Private Key Path: $PRIVATE_KEY_PATH"
+            echo "Public Key Path: $PUBLIC_KEY_PATH"
+        else
+            echo "Failed to generate SSL certificates"
+            # Fallback to running without SSL
+            PUBLIC_KEY_PATH=""
+            PRIVATE_KEY_PATH=""
+        fi
+    else
+        echo "Using existing self-signed SSL certificates"
+        echo "Private Key Path: $PRIVATE_KEY_PATH"
+        echo "Public Key Path: $PUBLIC_KEY_PATH"
+    fi
+fi
+
+# Set the certificate paths in the application if they exist
+if [ -n "$PUBLIC_KEY_PATH" ] && [ -f "$PUBLIC_KEY_PATH" ] && [ -n "$PRIVATE_KEY_PATH" ] && [ -f "$PRIVATE_KEY_PATH" ]; then
     /app/x-ui setting -webCert "$PUBLIC_KEY_PATH" -webCertKey "$PRIVATE_KEY_PATH"
 fi
 
