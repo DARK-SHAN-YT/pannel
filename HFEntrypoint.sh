@@ -1,5 +1,10 @@
 #!/bin/sh
 
+echo "Note: Certbot standalone mode cannot be used in Hugging Face Spaces environment"
+echo "because it requires opening ports 80/443 which are not available."
+echo "However, if you have Let's Encrypt certificates available through volume mount"
+echo "or other means, they will be used automatically."
+
 # Check if Let's Encrypt certificates exist, otherwise use self-signed
 LETSENCRYPT_CERT="/etc/letsencrypt/live/kushansewmina7-pannel.hf.space/fullchain.pem"
 LETSENCRYPT_KEY="/etc/letsencrypt/live/kushansewmina7-pannel.hf.space/privkey.pem"
